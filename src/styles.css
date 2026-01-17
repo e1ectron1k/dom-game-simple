@@ -92,10 +92,45 @@ p {
     box-shadow: 0 0 10px rgba(51, 154, 240, 0.3);
 }
 
+/* СТИЛИ ДЛЯ ИЗОБРАЖЕНИЯ ГНОМА */
 .gnome {
     width: 80%;
     height: 80%;
-    object-fit: contain;
+    object-fit: contain; /* Важно: сохраняет пропорции изображения */
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
+    animation: float 3s ease-in-out infinite;
+    transition: transform 0.3s ease;
+}
+
+/* Анимация плавания */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-5px) rotate(2deg);
+    }
+    75% {
+        transform: translateY(5px) rotate(-2deg);
+    }
+}
+
+/* Дополнительная анимация для активной клетки */
+.cell.active .gnome {
+    animation: float 2s ease-in-out infinite, glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0%, 100% {
+        filter: 
+            drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3))
+            drop-shadow(0 0 5px rgba(51, 154, 240, 0.5));
+    }
+    50% {
+        filter: 
+            drop-shadow(0 5px 15px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 10px rgba(51, 154, 240, 0.8));
+    }
 }
 
 .cell-label {
@@ -140,49 +175,7 @@ p {
     font-weight: bold;
 }
 
-.controls {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 20px 0;
-}
-
-.btn {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-.btn:hover {
-    background-color: #0056b3;
-}
-
-.btn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-}
-
-#stopBtn {
-    background-color: #dc3545;
-}
-
-#stopBtn:hover {
-    background-color: #c82333;
-}
-
-#resetBtn {
-    background-color: #28a745;
-}
-
-#resetBtn:hover {
-    background-color: #218838;
-}
-
+/* Адаптивность */
 @media (max-width: 600px) {
     .container {
         padding: 15px;
@@ -198,4 +191,30 @@ p {
         gap: 10px;
         text-align: center;
     }
+    
+    .gnome {
+        width: 70%;
+        height: 70%;
+    }
+}
+
+/* Запасной вариант если изображение не загрузится */
+.gnome::after {
+    content: "🧙";
+    display: none;
+    font-size: 2em;
+}
+
+.gnome[src=""],
+.gnome:not([src]) {
+    position: relative;
+}
+
+.gnome[src=""]::after,
+.gnome:not([src])::after {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }

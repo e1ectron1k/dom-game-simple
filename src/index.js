@@ -9,11 +9,6 @@ class SimpleGame {
     this.moveInterval = null;
     this.movesCount = 0;
     
-    this.gnomeElement = document.createElement('img');
-    this.gnomeElement.src = gnomeImage;
-    this.gnomeElement.className = 'gnome';
-    this.gnomeElement.alt = 'Гном';
-    
     this.initElements();
     this.initGameBoard();
     this.placeGnomeRandomly();
@@ -39,7 +34,7 @@ class SimpleGame {
         const label = document.createElement('span');
         label.className = 'cell-label';
         label.textContent = `${String.fromCharCode(65 + row)}${col + 1}`;
-        cell.append(label); 
+        cell.append(label);
         
         this.gameBoard.append(cell);
         this.cells.push(cell);
@@ -62,19 +57,23 @@ class SimpleGame {
       oldCell.classList.remove('active');
       const gnome = oldCell.querySelector('.gnome');
       if (gnome) {
+        gnome.remove();
       }
     }
     
     const newPosition = this.getRandomPosition(this.currentPosition);
     this.currentPosition = newPosition;
     
-
+    const gnomeElement = document.createElement('img');
+    gnomeElement.src = gnomeImage;
+    gnomeElement.className = 'gnome';
+    gnomeElement.alt = 'Гном';
+    
     const newCell = this.cells[this.currentPosition];
-    newCell.append(this.gnomeElement);
+    newCell.append(gnomeElement);
     newCell.classList.add('active');
     
     this.movesCount++;
-    
     this.updateUI();
   }
   
@@ -91,6 +90,7 @@ class SimpleGame {
   
   startMoving() {
     this.stopMoving();
+    
     this.moveInterval = setInterval(() => {
       this.placeGnomeRandomly();
     }, 2000);
@@ -104,31 +104,28 @@ class SimpleGame {
   }
   
   bindEvents() {
-    window.addEventListener('beforeunload', this.cleanup.bind(this));
+    this.beforeUnloadHandler = this.cleanup.bind(this);
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
     
-    document.addEventListener('visibilitychange', () => {
+    this.visibilityHandler = () => {
       if (document.hidden) {
         this.stopMoving();
       } else {
         this.startMoving();
       }
-    });
+    };
+    document.addEventListener('visibilitychange', this.visibilityHandler);
   }
   
   cleanup() {
     this.stopMoving();
     
-    window.removeEventListener('beforeunload', this.cleanup.bind(this));
-    document.removeEventListener('visibilitychange', () => {});
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+    document.removeEventListener('visibilitychange', this.visibilityHandler);
     
     this.gameBoard.innerHTML = '';
     this.cells = [];
     this.currentPosition = null;
-  }
-  
-  stopGame() {
-    this.stopMoving();
-    this.cleanup();
   }
 }
 
@@ -151,8 +148,4 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initGame);
 } else {
   initGame();
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { SimpleGame, initGame };
 }
