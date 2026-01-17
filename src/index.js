@@ -1,4 +1,5 @@
 import './styles.css';
+import gnomeImage from './gnome.png';
 
 class SimpleGame {
   constructor() {
@@ -7,6 +8,11 @@ class SimpleGame {
     this.currentPosition = null;
     this.moveInterval = null;
     this.movesCount = 0;
+    
+    this.gnomeElement = document.createElement('img');
+    this.gnomeElement.src = gnomeImage;
+    this.gnomeElement.className = 'gnome';
+    this.gnomeElement.alt = 'Гном';
     
     this.initElements();
     this.initGameBoard();
@@ -30,7 +36,6 @@ class SimpleGame {
         const cell = document.createElement('div');
         cell.className = 'cell';
         
-
         const label = document.createElement('span');
         label.className = 'cell-label';
         label.textContent = `${String.fromCharCode(65 + row)}${col + 1}`;
@@ -40,22 +45,6 @@ class SimpleGame {
         this.cells.push(cell);
       }
     }
-  }
-  
-  createGnomeElement() {
-    const gnome = document.createElement('div');
-    gnome.className = 'gnome';
-    gnome.style.width = '80%';
-    gnome.style.height = '80%';
-    gnome.style.backgroundColor = '#4cc9f0';
-    gnome.style.borderRadius = '50%';
-    gnome.style.display = 'flex';
-    gnome.style.alignItems = 'center';
-    gnome.style.justifyContent = 'center';
-    gnome.style.color = 'white';
-    gnome.style.fontWeight = 'bold';
-    gnome.textContent = 'G';
-    return gnome;
   }
   
   getRandomPosition(excludePosition = null) {
@@ -73,16 +62,15 @@ class SimpleGame {
       oldCell.classList.remove('active');
       const gnome = oldCell.querySelector('.gnome');
       if (gnome) {
-        gnome.remove();
       }
     }
     
     const newPosition = this.getRandomPosition(this.currentPosition);
     this.currentPosition = newPosition;
     
+
     const newCell = this.cells[this.currentPosition];
-    const gnomeElement = this.createGnomeElement();
-    newCell.append(gnomeElement);
+    newCell.append(this.gnomeElement);
     newCell.classList.add('active');
     
     this.movesCount++;
