@@ -8,7 +8,7 @@
 <body>
     <div class="container">
         <h1>Перемещение элемента в DOM Tree</h1>
-        <p>Гном перемещается случайным образом между клетками каждые 2 секунды</p>
+        <p>Гном перемещается случайным образом между клетками</p>
         
         <div class="info">
             <div class="info-item">
@@ -21,10 +21,15 @@
             </div>
         </div>
         
-        <div class="game-board" id="gameBoard">
-            
+        <div class="controls">
+            <button id="startBtn" class="btn">Старт</button>
+            <button id="stopBtn" class="btn">Стоп</button>
+            <button id="resetBtn" class="btn">Сброс</button>
         </div>
         
+        <div class="game-board" id="gameBoard">
+            <!-- Игровое поле 4x4 будет сгенерировано JavaScript -->
+        </div>
     </div>
 </body>
 </html>

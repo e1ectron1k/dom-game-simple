@@ -1,29 +1,24 @@
 import './styles.css';
-import gnomeImage from './gnome.png';
 
 class SimpleGame {
   constructor() {
     this.boardSize = 4;
     this.cells = [];
     this.currentPosition = null;
-    this.movesCount = 0;
     this.moveInterval = null;
+    this.movesCount = 0;
     
     this.initElements();
     this.initGameBoard();
     this.placeGnomeRandomly();
     this.startMoving();
+    this.bindEvents();
   }
   
   initElements() {
     this.gameBoard = document.getElementById('gameBoard');
     this.positionElement = document.getElementById('position');
     this.movesElement = document.getElementById('moves');
-    
-    this.gnomeElement = document.createElement('img');
-    this.gnomeElement.src = gnomeImage;
-    this.gnomeElement.alt = 'Гном';
-    this.gnomeElement.className = 'gnome';
   }
   
   initGameBoard() {
@@ -34,23 +29,37 @@ class SimpleGame {
       for (let col = 0; col < this.boardSize; col++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
-        cell.dataset.row = row;
-        cell.dataset.col = col;
         
+
         const label = document.createElement('span');
         label.className = 'cell-label';
         label.textContent = `${String.fromCharCode(65 + row)}${col + 1}`;
-        cell.appendChild(label);
+        cell.append(label); 
         
-        this.gameBoard.appendChild(cell);
+        this.gameBoard.append(cell);
         this.cells.push(cell);
       }
     }
   }
   
+  createGnomeElement() {
+    const gnome = document.createElement('div');
+    gnome.className = 'gnome';
+    gnome.style.width = '80%';
+    gnome.style.height = '80%';
+    gnome.style.backgroundColor = '#4cc9f0';
+    gnome.style.borderRadius = '50%';
+    gnome.style.display = 'flex';
+    gnome.style.alignItems = 'center';
+    gnome.style.justifyContent = 'center';
+    gnome.style.color = 'white';
+    gnome.style.fontWeight = 'bold';
+    gnome.textContent = 'G';
+    return gnome;
+  }
+  
   getRandomPosition(excludePosition = null) {
     let newPosition;
-    
     do {
       newPosition = Math.floor(Math.random() * this.cells.length);
     } while (excludePosition !== null && newPosition === excludePosition);
@@ -64,6 +73,7 @@ class SimpleGame {
       oldCell.classList.remove('active');
       const gnome = oldCell.querySelector('.gnome');
       if (gnome) {
+        gnome.remove();
       }
     }
     
@@ -71,7 +81,8 @@ class SimpleGame {
     this.currentPosition = newPosition;
     
     const newCell = this.cells[this.currentPosition];
-    newCell.appendChild(this.gnomeElement);
+    const gnomeElement = this.createGnomeElement();
+    newCell.append(gnomeElement);
     newCell.classList.add('active');
     
     this.movesCount++;
@@ -91,12 +102,69 @@ class SimpleGame {
   }
   
   startMoving() {
+    this.stopMoving();
     this.moveInterval = setInterval(() => {
       this.placeGnomeRandomly();
     }, 2000);
   }
+  
+  stopMoving() {
+    if (this.moveInterval) {
+      clearInterval(this.moveInterval);
+      this.moveInterval = null;
+    }
+  }
+  
+  bindEvents() {
+    window.addEventListener('beforeunload', this.cleanup.bind(this));
+    
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this.stopMoving();
+      } else {
+        this.startMoving();
+      }
+    });
+  }
+  
+  cleanup() {
+    this.stopMoving();
+    
+    window.removeEventListener('beforeunload', this.cleanup.bind(this));
+    document.removeEventListener('visibilitychange', () => {});
+    
+    this.gameBoard.innerHTML = '';
+    this.cells = [];
+    this.currentPosition = null;
+  }
+  
+  stopGame() {
+    this.stopMoving();
+    this.cleanup();
+  }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  new SimpleGame();
+let gameInstance = null;
+
+function initGame() {
+  if (gameInstance) {
+    gameInstance.cleanup();
+  }
+  gameInstance = new SimpleGame();
+}
+
+window.addEventListener('beforeunload', () => {
+  if (gameInstance) {
+    gameInstance.cleanup();
+  }
 });
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initGame);
+} else {
+  initGame();
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { SimpleGame, initGame };
+}
